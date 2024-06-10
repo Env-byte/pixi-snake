@@ -7,21 +7,18 @@ import { useStore } from '../store/store.ts';
 import { ContainerRef } from '../types/pixiTypes.ts';
 import { divideCanvas, parseCoordinates } from '../utils/canvas.ts';
 
-const maxSpawn = 1;
+const maxSpawn = 10;
 
 export const FoodSpawner = forwardRef<ContainerRef>((_props, ref) => {
 	const [dimensions, canvas] = useStore(useShallow((state) => [state.settings.snake.dimensions, state.settings.canvas]));
 
-	const count = useRef<number>(0);
-
 	const containerRef = useRef<ContainerRef | null>(null);
-
 	const grid = divideCanvas({ canvas, dimensions });
 	useEffect(() => {
 		const spawn = () => {
 			if (containerRef.current === null) return;
-
-			if (count.current >= maxSpawn) {
+			const count = containerRef.current?.children.length ?? 0;
+			if (count >= maxSpawn) {
 				return;
 			}
 
@@ -35,7 +32,6 @@ export const FoodSpawner = forwardRef<ContainerRef>((_props, ref) => {
 			const food = new Graphics().clear().beginFill('grey').lineStyle(2, 'black', 1).drawCircle(10, 10, 10);
 			food.position.set(x, y);
 			containerRef.current.addChild(food);
-			count.current += 1;
 		};
 
 		const interval = setInterval(() => {

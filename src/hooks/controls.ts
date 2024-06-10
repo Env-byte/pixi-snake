@@ -2,6 +2,13 @@ import { useEffect } from 'react';
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
+export const flipDirection = (direction: Direction) => {
+	if (direction === 'up') return 'down';
+	if (direction === 'down') return 'up';
+	if (direction === 'left') return 'right';
+	return 'left';
+};
+
 interface UseArrowKeyProp {
 	callback: (key: Direction) => void;
 }

@@ -5,7 +5,7 @@ import { Snake } from '../components';
 import { FoodSpawner } from '../components/FoodSpawner.tsx';
 import { Direction, useArrowKeys } from '../hooks';
 import { useDetectCollision } from '../hooks/collisionDetection.ts';
-import { setSnake, useStore } from '../store/store.ts';
+import { setDirection, setSnake, useStore } from '../store/store.ts';
 import { ContainerRef, GraphicRef } from '../types/pixiTypes.ts';
 import { moveSnake } from '../utils/canvas.ts';
 
@@ -14,6 +14,7 @@ export const GamePage = () => {
 	const keyCallback = useCallback(
 		(direction: Direction) => {
 			setSnake(moveSnake({ snake, direction }));
+			setDirection(direction);
 		},
 		[snake]
 	);

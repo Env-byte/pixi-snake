@@ -48,22 +48,31 @@ interface MoveSnakeProps {
 }
 
 export const moveSnake = ({ snake, direction }: MoveSnakeProps) => {
-	const head = { ...snake[0] };
+	const head = applyMove({ segment: snake[0], direction });
+	return [head, ...snake.slice(0, -1)];
+};
+
+interface ApplyMoveProps {
+	segment: Coordinate;
+	direction: Direction;
+}
+
+export const applyMove = ({ segment, direction }: ApplyMoveProps) => {
+	const newSegment = { ...segment };
 	switch (direction) {
 		case 'down':
-			head.y += 1;
+			newSegment.y += 1;
 			break;
 		case 'up':
-			head.y -= 1;
+			newSegment.y -= 1;
 			break;
 		case 'left':
-			head.x -= 1;
+			newSegment.x -= 1;
 			break;
 		case 'right':
-			head.x += 1;
+			newSegment.x += 1;
 			break;
 	}
-	const newSnake: Coordinate[] = [head, ...snake.slice(0, -1)];
 
-	return newSnake;
+	return newSegment;
 };
