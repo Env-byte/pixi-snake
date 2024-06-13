@@ -1,14 +1,12 @@
 import { DisplayObject } from '@pixi/display';
-import { Container, Graphics, PixiRef } from '@pixi/react';
 import { useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { pushSnakeSegment, useStore } from '../store/store.ts';
-import { applyMove } from '../utils/canvas.ts';
-import { flipDirection } from './controls.ts';
+import { useStore } from '../store/store.ts';
+import { ContainerRef, SpriteRef } from '../types/pixiTypes.ts';
 
 interface UseDetectionCollisionProps {
-	snake: PixiRef<typeof Graphics> | null;
-	food: PixiRef<typeof Container> | null;
+	snake: SpriteRef | null;
+	food: ContainerRef | null;
 }
 
 function testForAABB(object1: DisplayObject, object2: DisplayObject) {
@@ -28,7 +26,7 @@ export const useDetectCollision = ({ snake, food }: UseDetectionCollisionProps) 
 
 			item?.destroy();
 			const segment = segments[segments.length - 1];
-			pushSnakeSegment(applyMove({ segment, direction: flipDirection(direction) }));
+			//pushSnakeSegment(applyMove({ segment, direction: flipDirection(direction) }));
 		});
 	}, [direction, food, segments, snake]);
 };

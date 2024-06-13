@@ -1,1 +1,1 @@
-export * from './Snake.tsx'
+export * from './Snake';

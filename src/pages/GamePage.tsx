@@ -1,35 +1,42 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { Stage } from '@pixi/react';
 import { useCallback, useRef } from 'react';
 import { Snake } from '../components';
-import { FoodSpawner } from '../components/FoodSpawner.tsx';
-import { Direction, useArrowKeys } from '../hooks';
+import { Direction, flipDirection, useArrowKeys } from '../hooks';
 import { useDetectCollision } from '../hooks/collisionDetection.ts';
-import { setDirection, setSnake, useStore } from '../store/store.ts';
-import { ContainerRef, GraphicRef } from '../types/pixiTypes.ts';
-import { moveSnake } from '../utils/canvas.ts';
+import { setDirection, useStore } from '../store/store.ts';
+import { ContainerRef, SpriteRef } from '../types/pixiTypes.ts';
 
 export const GamePage = () => {
-	const snake = useStore((s) => s.snake);
-	const keyCallback = useCallback(
-		(direction: Direction) => {
-			setSnake(moveSnake({ snake, direction }));
-			setDirection(direction);
-		},
-		[snake]
-	);
+	const direction = useStore((state) => state.direction);
+	const keyCallback = useCallback((current: Direction, newDirection: Direction) => {
+		//ignore if already going in that direction
+		if (current === newDirection) return;
+		//cannot go back on self
+		if (newDirection === flipDirection(current)) return;
+		setDirection(newDirection);
+	}, []);
 
-	const snakeRef = useRef<GraphicRef>(null);
+	const snakeRef = useRef<SpriteRef>(null);
 	const foodRef = useRef<ContainerRef>(null);
 
 	useArrowKeys({ callback: keyCallback });
 
 	useDetectCollision({ snake: snakeRef.current, food: foodRef.current });
 	return (
-		<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+		<Box
+			sx={{
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				height: '100%',
+				flexDirection: 'column',
+				gap: 2
+			}}
+		>
+			<Typography variant={'h3'}>{direction.toUpperCase()}</Typography>
 			<Stage style={{ borderRadius: '4px' }} options={{ background: 'lightgrey' }} height={600} width={600}>
 				<Snake ref={snakeRef} />
-				<FoodSpawner ref={foodRef} />
 			</Stage>
 		</Box>
 	);

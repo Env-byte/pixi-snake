@@ -1,41 +1,67 @@
-import { Graphics } from '@pixi/react';
-import { forwardRef, useCallback } from 'react';
+import { Texture } from '@pixi/core';
+import { Container, Sprite, useTick } from '@pixi/react';
+import { Point } from 'pixi.js';
+import { forwardRef, useMemo, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Coordinate, useStore } from '../store/store.ts';
-import { Draw, G, GraphicRef } from '../types/pixiTypes.ts';
-import { parseCoordinates } from '../utils/canvas.ts';
+import { Direction } from '../hooks';
+import { useStore } from '../store/store.ts';
+import { ContainerRef } from '../types/pixiTypes.ts';
 
-interface BuildSnakeProps {
-	snake: Coordinate[];
-	g: G;
-	dimensions: number; //the dimensions of the snake
-	width: number; //the dimensions of the snake
+interface GetPosProps {
+	direction: Direction;
+	position: Point;
+	speed: number;
 }
 
-const buildSnake = ({ snake, dimensions, g, width }: BuildSnakeProps) => {
-	g.clear();
-	g.beginFill('grey');
-	g.moveTo(0, 0);
-	snake.forEach((coordinates, i) => {
-		if (i !== 0) {
-			g.lineStyle(width, 'yellow', 1);
-		} else {
-			g.lineStyle(width, 'red', 1);
-		}
-		const parsedCoords = parseCoordinates({ coordinates, dimensions });
-		const position = parsedCoords.x - dimensions;
-		g.drawRect(position + dimensions, parsedCoords.y - dimensions, dimensions, dimensions);
-	});
+const getPos = ({ position, direction, speed }: GetPosProps) => {
+	switch (direction) {
+		case 'up':
+			return new Point(position.x, position.y - speed);
+		case 'down':
+			return new Point(position.x, position.y + speed);
+		case 'left':
+			return new Point(position.x - speed, position.y);
+		case 'right':
+			return new Point(position.x + speed, position.y);
+	}
 };
 
-export const Snake = forwardRef<GraphicRef>((_, ref) => {
-	const [snake, snakeSettings] = useStore(useShallow((state) => [state.snake, state.settings.snake]));
-	const draw = useCallback<Draw>(
-		(g) => {
-			const { dimensions, width } = snakeSettings;
-			buildSnake({ width, snake, g, dimensions });
-		},
-		[snake, snakeSettings]
+export const Snake = forwardRef<ContainerRef>((_, ref) => {
+	const [speed, direction] = useStore(useShallow((state) => [state.settings.snake.speed, state.direction]));
+
+	const snakeRef = useRef<ContainerRef | null>(null);
+
+	useTick(() => {
+		const snake = snakeRef.current;
+		if (!snake) return;
+		const position = new Point(snake.position.x, snake.position.y);
+		snake.position = getPos({ speed, direction, position });
+	});
+
+	return (
+		<Container
+			ref={(node) => {
+				snakeRef.current = node;
+				if (typeof ref === 'function') {
+					ref(node);
+					return;
+				}
+				if (ref) ref.current = node;
+			}}
+		>
+			<SnakeSegments />
+		</Container>
 	);
-	return <Graphics ref={ref} draw={draw} />;
 });
+
+const SnakeSegments = () => {
+	const [snake, snakeSettings] = useStore(useShallow((state) => [state.snake, state.settings.snake]));
+
+	const sprites = useMemo(() => {
+		return snake.map((segment, index) => {
+			return <Sprite key={`segment-${index}`} tint={index === 0 ? 'red' : 'green'} position={segment} width={snakeSettings.dimensions} height={snakeSettings.dimensions} texture={Texture.WHITE} />;
+		});
+	}, [snake, snakeSettings.dimensions]);
+
+	return <>{sprites}</>;
+};

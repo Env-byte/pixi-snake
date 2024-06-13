@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useStore } from '../store/store.ts';
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -10,10 +11,12 @@ export const flipDirection = (direction: Direction) => {
 };
 
 interface UseArrowKeyProp {
-	callback: (key: Direction) => void;
+	callback: (current: Direction, newDirection: Direction) => void;
 }
 
 export const useArrowKeys = ({ callback }: UseArrowKeyProp) => {
+	const direction = useStore((state) => state.direction);
+
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			switch (e.key) {
@@ -21,11 +24,11 @@ export const useArrowKeys = ({ callback }: UseArrowKeyProp) => {
 				case 'ArrowDown':
 				case 'ArrowLeft':
 				case 'ArrowRight':
-					callback(e.key.replace('Arrow', '').toLowerCase() as Direction);
+					callback(direction, e.key.replace('Arrow', '').toLowerCase() as Direction);
 					break;
 			}
 		};
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [callback]);
+	}, [callback, direction]);
 };

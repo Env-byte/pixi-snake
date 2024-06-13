@@ -1,3 +1,4 @@
+import { Point } from 'pixi.js';
 import { create } from 'zustand';
 import { Direction } from '../hooks';
 
@@ -9,6 +10,7 @@ export interface CanvasSettings {
 export interface SnakeSettings {
 	dimensions: number;
 	width: number;
+	speed: number;
 }
 
 interface Settings {
@@ -17,15 +19,10 @@ interface Settings {
 	debug: boolean;
 }
 
-export interface Coordinate {
-	x: number;
-	y: number;
-}
-
 interface Store {
 	clickedPlay: boolean;
 	settings: Settings;
-	snake: Coordinate[];
+	snake: Point[];
 	direction: Direction;
 }
 
@@ -36,7 +33,7 @@ export const useStore = create<Store>(() => ({
 			width: 600,
 			height: 600
 		},
-		snake: { dimensions: 20, width: 2 },
+		snake: { dimensions: 20, width: 1, speed: 0.3 },
 		debug: false
 	},
 	snake: [],
@@ -45,8 +42,8 @@ export const useStore = create<Store>(() => ({
 
 export const setClickedPlay = (value: boolean) => useStore.setState(() => ({ clickedPlay: value }));
 
-export const pushSnakeSegment = (coordinate: Coordinate) => useStore.setState((s) => ({ snake: [...s.snake, coordinate] }));
+export const pushSnakeSegment = (coordinate: Point) => useStore.setState((s) => ({ snake: [...s.snake, coordinate] }));
 
-export const setSnake = (snake: Coordinate[]) => useStore.setState(() => ({ snake }));
+export const setSnake = (snake: Point[]) => useStore.setState(() => ({ snake }));
 
 export const setDirection = (direction: Direction) => useStore.setState(() => ({ direction }));
